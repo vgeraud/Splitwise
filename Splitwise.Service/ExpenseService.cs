@@ -54,6 +54,8 @@ namespace Splitwise.Service
             _unitOfWork.Commit();
         }
 
+
+        //ceci est just une function bidon pour illustrer l'utilisation des mocks et l'injection de dépendances. On peut l'enlever après
         public decimal DoubleUpExpense(int expenseId)
         {
             var expense = _expenseRepository.GetById(expenseId);

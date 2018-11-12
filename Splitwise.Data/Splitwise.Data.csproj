@@ -58,6 +58,8 @@
     <Compile Include="Infrastructure\RepositoryBase.cs" />
     <Compile Include="Infrastructure\UnitOfWork.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\UserRepository.cs" />
+    <Compile Include="Repositories\GroupRepository.cs" />
     <Compile Include="Repositories\ExpenseRepository.cs" />
     <Compile Include="SplitwiseContext.cs" />
     <Compile Include="SplitwiseSeedData.cs" />
