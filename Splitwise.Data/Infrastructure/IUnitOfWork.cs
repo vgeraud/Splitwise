@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Splitwise.Tests.Controllers
+namespace Splitwise.Data.Infrastructure
 {
-    class ExpenseController
+    public interface IUnitOfWork
     {
+        void Commit();
     }
 }

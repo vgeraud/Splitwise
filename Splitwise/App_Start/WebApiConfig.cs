@@ -7,6 +7,10 @@ namespace Splitwise
     {
         public static void Register(HttpConfiguration config)
         {
+
+            config.DependencyResolver = new UnityResolver(UnityConfig.Container);
+
+
             // Web API configuration and services
             config.Formatters.JsonFormatter.SupportedMediaTypes
                 .Add(new MediaTypeHeaderValue("text/html"));
