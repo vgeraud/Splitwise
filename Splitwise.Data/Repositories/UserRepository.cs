@@ -1,11 +1,6 @@
 ﻿using Splitwise.Data.Infrastracture;
 using Splitwise.Data.Infrastructure;
 using Splitwise.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Splitwise.Data.Repositories
 {
@@ -18,7 +13,7 @@ namespace Splitwise.Data.Repositories
 
     }
 
-    public interface IUserRepository : IRepository<Expense>
+    public interface IUserRepository : IRepository<User>
     {
 
     }
