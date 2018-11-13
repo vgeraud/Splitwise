@@ -18,7 +18,7 @@ namespace Splitwise.Data.Repositories
 
     }
 
-    public interface IUserRepository : IRepository<Expense>
+    public interface IUserRepository : IRepository<User>
     {
 
     }

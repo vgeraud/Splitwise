@@ -18,7 +18,7 @@ namespace Splitwise.Data.Repositories
 
     }
 
-    public interface IGroupRepository : IRepository<Expense>
+    public interface IGroupRepository : IRepository<Group>
     {
 
     }
