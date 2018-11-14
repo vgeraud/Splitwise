@@ -1,10 +1,5 @@
 ﻿using Splitwise.Models;
-using System;
-using System.Collections.Generic;
 using System.Data.Entity.ModelConfiguration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Splitwise.Data.Configuration
 {
@@ -14,8 +9,9 @@ namespace Splitwise.Data.Configuration
         {
             ToTable("Expenses");
             Property(g => g.Id).IsRequired();
-            Property(g => g.Type).IsRequired();
             Property(g => g.Date).IsRequired();
+            Property(g => g.InitialAmount).IsRequired();
+            Property(g => g.IsTaxIncluded).IsRequired();
         }
     }
 }
