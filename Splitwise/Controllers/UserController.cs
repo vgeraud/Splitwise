@@ -1,14 +1,7 @@
-﻿using Newtonsoft.Json;
-using Splitwise.Helpers;
-using Splitwise.Model.Exceptions;
-using Splitwise.Models;
+﻿using Splitwise.Models;
 using Splitwise.Service;
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.Http;
 using System.Web.Http;
-using System.Web.Script.Serialization;
 
 namespace Splitwise.Controllers
 {
@@ -22,24 +15,29 @@ namespace Splitwise.Controllers
         }
 
         [HttpPost]
-        public HttpResponseMessage CreateUser(User user)
+        public IHttpActionResult CreateUser(User user)
         {
             try
             {
-                _userService.CreateUser(user);
-                _userService.SaveUser();
+                if (user == null)
+                {
+                    return BadRequest();
+                }
 
-                return new HttpResponseMessage(HttpStatusCode.OK);
-            }
-            catch (InvalidParametersException invalidParams)
-            {
-                return ResponseHelper.ResponseFromInvalidParametersException(invalidParams);
-            }
+                var saveResult = _userService.CreateUser(user);
+
+
+                if (saveResult.Success)
+                {
+                    return Ok(saveResult.Model);
+                }
+
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }           
             catch (Exception ex)
             {
-                var response = new HttpResponseMessage(HttpStatusCode.InternalServerError);
-                response.Content = new StringContent(ex.Message);
-                return response;
+                //TODO: log exception
+                return this.InternalServerError(ex);             
             }
             
         }

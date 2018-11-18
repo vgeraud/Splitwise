@@ -24,7 +24,6 @@ namespace Splitwise.Data.Infrastructure
 
         public void Commit()
         {
-            var changes = DbContext.ChangeTracker.HasChanges();
             DbContext.Commit();
         }
     }

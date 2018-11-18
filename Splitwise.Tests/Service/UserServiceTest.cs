@@ -4,7 +4,8 @@ using Splitwise.Data;
 using Splitwise.Data.Infrastracture;
 using Splitwise.Data.Infrastructure;
 using Splitwise.Data.Repositories;
-using Splitwise.Model.Exceptions;
+using Splitwise.Model;
+using Splitwise.Model.Validators;
 using Splitwise.Models;
 using Splitwise.Service;
 using System.Collections.Generic;
@@ -23,11 +24,12 @@ namespace Splitwise.Tests.Service
         UserService _userService;
 
        [TestMethod]
-        public void SaveUser_UserIsCreated()
+        public void CreateUser_UserIsCreated()
         {
             User userToSave = new User();
             userToSave.Id = 1;
             userToSave.Username = "lcardona";
+            userToSave.Email = "email@server.com";
             userToSave.Password = "somePwd";
             userToSave.Currency = Models.Enums.Currency.CAD;
             userToSave.PhoneNumber = "51878928";
@@ -35,12 +37,12 @@ namespace Splitwise.Tests.Service
             List<User> userTable = new List<User>();
 
             SetupMocks(new List<User>());
-                        
-            _userService.CreateUser(userToSave);
-            _userService.SaveUser();
+
+            SaveResultModel<User>  result =_userService.CreateUser(userToSave);
             User createdUser = _userService.GetUser(userToSave.Id);
 
             _dataMock.Verify(m => m.Add(It.IsAny<User>()), Times.Once);
+            Assert.IsTrue(result.Success);
             Assert.IsNotNull(createdUser);
             Assert.AreEqual(createdUser.Username, userToSave.Username);
             Assert.AreEqual(createdUser.Password, userToSave.Password);
@@ -49,12 +51,33 @@ namespace Splitwise.Tests.Service
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidParametersException))]
-        public void SaveUser_Validate_ShouldDetectInvalidInput()
+        public void CreateUser_Validate_ShouldDetectInvalidInput()
         {
             SetupMocks(new List<User>());
             User userToSave = new User();
-            _userService.CreateUser(userToSave);
+            SaveResultModel<User> result = _userService.CreateUser(userToSave);
+            Assert.IsFalse(result.Success);
+        }
+
+        [TestMethod]
+        public void CreateUser_Validate_ShouldDetectExistingUser()
+        {
+            SetupMocks(new List<User> { 
+                new User() { 
+                    Id = 101,
+                    Username = "lcardona",
+                    Password = "somePwd",
+                    Currency = Models.Enums.Currency.CAD,
+                    PhoneNumber = "51878928"}
+                });
+            User userToSave = new User();
+            userToSave.Id = 1;
+            userToSave.Username = "lcardona";
+            userToSave.Password = "somePwd";
+            userToSave.Currency = Models.Enums.Currency.CAD;
+            userToSave.PhoneNumber = "51878928";
+            SaveResultModel<User> result = _userService.CreateUser(userToSave);
+            Assert.IsFalse(result.Success);
         }
       
         private void SetupMocks(List<User> data)
@@ -66,7 +89,7 @@ namespace Splitwise.Tests.Service
             _factoryMock.Setup(f => f.Init()).Returns(_contextMock.Object);
 
             _userRepository = new UserRepository(_factoryMock.Object);
-            _userService = new UserService(_userRepository, Mock.Of<IUnitOfWork>());
+            _userService = new UserService(_userRepository, Mock.Of<IUnitOfWork>(), new UserValidator());
         }
 
 

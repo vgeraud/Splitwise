@@ -66,7 +66,8 @@ namespace Splitwise
             container.RegisterType<IExpenseService, ExpenseService>(new InjectionConstructor(new object[] { container.Resolve<IExpenseRepository>(), container.Resolve<IUnitOfWork>() }));
 
             container.RegisterType<IUserRepository, UserRepository>(factoryInjection);
-            container.RegisterType<IUserService, UserService>(new InjectionConstructor(new object[] { container.Resolve<IUserRepository>(), container.Resolve<IUnitOfWork>() }));
+            container.RegisterType<IValidator<User>, UserValidator>();
+            container.RegisterType<IUserService, UserService>(new InjectionConstructor(new object[] { container.Resolve<IUserRepository>(), container.Resolve<IUnitOfWork>(), container.Resolve<IValidator<User>>() }));
 
             container.RegisterType<IGroupRepository, GroupRepository>(factoryInjection);
             container.RegisterType<IValidator<Group>, GroupValidator>();

@@ -1,57 +1,57 @@
 ﻿using Splitwise.Data.Infrastructure;
 using Splitwise.Data.Repositories;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Splitwise.Models;
-using Splitwise.Model.Exceptions;
+using Splitwise.Model.Validators;
+using Splitwise.Model;
 
 namespace Splitwise.Service
 {
     public interface IUserService
     {
-        void CreateUser(User userToSave);
-        void SaveUser();
+        SaveResultModel<User> CreateUser(User userToSave);
     }
 
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidator<User> _userValidator;
 
-        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork)
+        public UserService(IUserRepository userRepository, IUnitOfWork unitOfWork, IValidator<User> userValidator)
         {
             this._userRepository = userRepository;
             this._unitOfWork = unitOfWork;
+            this._userValidator = userValidator;
         }
 
-        public void CreateUser(User userToSave)
+        public SaveResultModel<User> CreateUser(User userToSave)
         {
-            ValidateUserCreate(userToSave);
-            this._userRepository.Add(userToSave);            
-        }
+            var result = new SaveResultModel<User> { Model = userToSave };
 
-        private void ValidateUserCreate(User userToSave)
-        {
-            var parameterErrorCollection = new List<InvalidParameter>();
-            ValidationHelper.ValidateRequiredAndAddError(parameterErrorCollection, nameof(userToSave.Username), userToSave.Username);
-            ValidationHelper.ValidateRequiredAndAddError(parameterErrorCollection, nameof(userToSave.Email), userToSave.Email);
-            ValidationHelper.ValidateRequiredAndAddError(parameterErrorCollection, nameof(userToSave.Password), userToSave.Password);
-            ValidationHelper.ValidateRequiredAndAddError(parameterErrorCollection, nameof(userToSave.Currency), userToSave.Currency.ToString());
-
-            if (parameterErrorCollection.Count > 0)
+            IList<string> errorMessages = new List<string>();
+            if (!_userValidator.Validate(userToSave, out errorMessages))
             {
-                InvalidParametersException parameterError = new InvalidParametersException(parameterErrorCollection, "Invalid parameters");
-                throw parameterError;
+                result.Success = false;
+                result.ErrorMessages = errorMessages;
+                return result;
             }
-        }
 
-        public void SaveUser()
-        {
+            var nameAlreadyExists = _userRepository.Get(g => g.Username == userToSave.Username) != null;
+
+            if (nameAlreadyExists)
+            {
+                result.Success = false;
+                result.ErrorMessages = new List<string> { "Username already exists." };
+                return result;
+            }
+
+            this._userRepository.Add(userToSave);
             _unitOfWork.Commit();
-        }
+
+            result.Success = true;
+            return result;
+        }        
 
         public User GetUser(int id)
         {
