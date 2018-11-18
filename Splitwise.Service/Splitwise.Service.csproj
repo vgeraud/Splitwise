@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="ExpenseService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UserService.cs" />
+    <Compile Include="ValidationHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Splitwise.Data\Splitwise.Data.csproj">
