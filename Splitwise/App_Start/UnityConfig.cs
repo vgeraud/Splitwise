@@ -2,6 +2,7 @@ using Splitwise.Controllers;
 using Splitwise.Data.Infrastracture;
 using Splitwise.Data.Infrastructure;
 using Splitwise.Data.Repositories;
+using Splitwise.Model.Validators;
 using Splitwise.Models;
 using Splitwise.Service;
 using System;
@@ -52,6 +53,7 @@ namespace Splitwise
 
             container.RegisterType<ExpenseController>();
             container.RegisterType<UserController>();
+            container.RegisterType<GroupsController>();
 
             container.RegisterType<IDbFactory, DbFactory>();
 
@@ -65,6 +67,10 @@ namespace Splitwise
 
             container.RegisterType<IUserRepository, UserRepository>(factoryInjection);
             container.RegisterType<IUserService, UserService>(new InjectionConstructor(new object[] { container.Resolve<IUserRepository>(), container.Resolve<IUnitOfWork>() }));
+
+            container.RegisterType<IGroupRepository, GroupRepository>(factoryInjection);
+            container.RegisterType<IValidator<Group>, GroupValidator>();
+            container.RegisterType<IGroupService, GroupService>(new InjectionConstructor(new object[] { container.Resolve<IGroupRepository>(), container.Resolve<IUnitOfWork>(), container.Resolve<IValidator<Group>>() }));
         }
     }
 }

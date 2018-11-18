@@ -13,8 +13,9 @@ namespace Splitwise.Data
     {
         public SplitwiseContext() : base("SplitwiseContext") { }
 
+        public DbSet<User> User { get; set; }
+        public DbSet<Group> Groups { get; set; }
         public DbSet<Expense> Expenses { get; set; }
-        public DbSet<User> Users { get; set; }
 
         public virtual void Commit()
         {
@@ -25,6 +26,7 @@ namespace Splitwise.Data
         {
             modelBuilder.Configurations.Add(new ExpenseConfiguration());
             modelBuilder.Configurations.Add(new UserConfiguration());
+            modelBuilder.Configurations.Add(new GroupConfiguration());
         }
     }
 }
