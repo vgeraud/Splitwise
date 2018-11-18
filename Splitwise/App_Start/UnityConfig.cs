@@ -2,10 +2,13 @@ using Splitwise.Controllers;
 using Splitwise.Data.Infrastracture;
 using Splitwise.Data.Infrastructure;
 using Splitwise.Data.Repositories;
+using Splitwise.Model.Validators;
+using Splitwise.Models;
 using Splitwise.Service;
 using System;
 
 using Unity;
+using Unity.Injection;
 
 namespace Splitwise
 {
@@ -49,11 +52,21 @@ namespace Splitwise
             // container.RegisterType<IProductRepository, ProductRepository>();
 
             container.RegisterType<ExpenseController>();
+            container.RegisterType<GroupsController>();
 
             container.RegisterType<IDbFactory, DbFactory>();
-            container.RegisterType<IUnitOfWork, UnitOfWork>();
-            container.RegisterType<IExpenseRepository, ExpenseRepository>();
-            container.RegisterType<IExpenseService, ExpenseService>();
+
+            var factoryInjection = new InjectionConstructor(container.Resolve<IDbFactory>());
+
+            container.RegisterType<IUnitOfWork, UnitOfWork>(factoryInjection);
+            var unitOfWorkInjection = new InjectionConstructor(container.Resolve<IUnitOfWork>());
+
+            container.RegisterType<IExpenseRepository, ExpenseRepository>(factoryInjection);
+            container.RegisterType<IExpenseService, ExpenseService>(new InjectionConstructor(new object[] { container.Resolve<IExpenseRepository>(), container.Resolve<IUnitOfWork>() }));
+
+            container.RegisterType<IGroupRepository, GroupRepository>(factoryInjection);
+            container.RegisterType<IValidator<Group>, GroupValidator>();
+            container.RegisterType<IGroupService, GroupService>(new InjectionConstructor(new object[] { container.Resolve<IGroupRepository>(), container.Resolve<IUnitOfWork>(), container.Resolve<IValidator<Group>>() }));
         }
     }
 }

@@ -8,13 +8,15 @@ namespace Splitwise.Controllers
     {
         // GET api/user
         [HttpGet]
-        public User Get(int id)
+        public IHttpActionResult Get(int id)
         {
-            return new User
+            var model =  new User
             {
                 Id = id,
                 Username = "test"
             };
+
+            return Ok(model);
         }
     }
 }
