@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Splitwise.Tests.Controllers
 {
-    class FriendsController
+    class FriendsControllerTest
     {
     }
 }

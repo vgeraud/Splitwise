@@ -117,12 +117,12 @@
   <ItemGroup>
     <Compile Include="Controllers\AuthenticationController.cs" />
     <Compile Include="Controllers\ExpenseControllerTest.cs" />
-    <Compile Include="Controllers\FriendsController.cs" />
-    <Compile Include="Controllers\GroupsController.cs" />
+    <Compile Include="Controllers\FriendsControllerTest.cs" />
+    <Compile Include="Controllers\GroupsControllerTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Controllers\UserControllerTest.cs" />
-    <Compile Include="Providers\UserProviderTest.cs" />
     <Compile Include="Service\ExpenseServiceTest.cs" />
+    <Compile Include="Service\GroupServiceTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App.config" />

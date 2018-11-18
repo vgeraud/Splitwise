@@ -13,8 +13,10 @@ namespace Splitwise.Data
     {
         public SplitwiseContext() : base("SplitwiseContext") { }
 
+        public DbSet<User> User { get; set; }
+        public DbSet<Group> Groups { get; set; }
         public DbSet<Expense> Expenses { get; set; }
-
+        
         public virtual void Commit()
         {
             base.SaveChanges();
@@ -23,6 +25,8 @@ namespace Splitwise.Data
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Configurations.Add(new ExpenseConfiguration());
+            modelBuilder.Configurations.Add(new UserConfiguration());
+            modelBuilder.Configurations.Add(new GroupConfiguration());
         }
     }
 }
