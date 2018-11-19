@@ -10,6 +10,7 @@ namespace Splitwise.Service
     public interface IUserService
     {
         SaveResultModel<User> CreateUser(User userToSave);
+        SaveResultModel<User> AddFriend(User user, User friend);
     }
 
     public class UserService : IUserService
@@ -51,12 +52,25 @@ namespace Splitwise.Service
 
             result.Success = true;
             return result;
-        }        
+        }
 
         public User GetUser(int id)
         {
             var user = _userRepository.Get(u => u.Id == id);
             return user;
+        }
+
+        public SaveResultModel<User> AddFriend(User user, User friend)
+        {
+            var result = new SaveResultModel<User> { Model = user };
+
+            user.Friends.Add(friend);
+            this._userRepository.Update(user);
+            _unitOfWork.Commit();
+
+            result.Success = true;
+
+            return result;
         }
     }
 }

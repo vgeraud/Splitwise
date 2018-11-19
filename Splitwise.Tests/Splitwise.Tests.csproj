@@ -123,6 +123,7 @@
     <Compile Include="Controllers\UserControllerTest.cs" />
     <Compile Include="Service\ExpenseServiceTest.cs" />
     <Compile Include="Service\GroupServiceTest.cs" />
+    <Compile Include="Service\FriendServiveTest.cs" />
     <Compile Include="Service\UserServiceTest.cs" />
     <Compile Include="TestHelper.cs" />
   </ItemGroup>
