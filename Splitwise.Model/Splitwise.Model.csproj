@@ -51,6 +51,8 @@
     <Compile Include="Validators\ExpenseValidator.cs" />
     <Compile Include="Validators\GroupValidator.cs" />
     <Compile Include="Validators\IValidator.cs" />
+    <Compile Include="Validators\UserValidator.cs" />
+    <Compile Include="Validators\ValidationHelper.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

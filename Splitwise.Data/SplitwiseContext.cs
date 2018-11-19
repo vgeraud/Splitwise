@@ -16,7 +16,7 @@ namespace Splitwise.Data
         public DbSet<User> User { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<Expense> Expenses { get; set; }
-        
+
         public virtual void Commit()
         {
             base.SaveChanges();
