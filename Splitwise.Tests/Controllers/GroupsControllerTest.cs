@@ -16,7 +16,7 @@ namespace Splitwise.Tests.Controllers
         private GroupsController controller;
 
         [TestMethod]
-        public void PostGroup_CorrectGroup_ReturnsId()
+        public void PostGroup_CorrectGroup_ReturnsOk()
         {
             var fakeGroup = new Group
             {
@@ -62,6 +62,38 @@ namespace Splitwise.Tests.Controllers
 
             Assert.IsTrue(result != null);
             Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void DeleteGroup_ExistingGroup_ReturnsOk()
+        {
+            var groupId = 1;
+
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.DeleteGroup(It.IsAny<int>())).Returns(1);
+
+            controller = new GroupsController(groupServiceMock.Object);
+
+            var result = controller.Delete(groupId);
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(OkResult));
+        }
+
+        [TestMethod]
+        public void DeleteGroup_NonExistingGroup_ReturnsBadRequest()
+        {
+            var groupId = 1;
+
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.DeleteGroup(It.IsAny<int>())).Returns((int?)null);
+
+            controller = new GroupsController(groupServiceMock.Object);
+
+            var result = controller.Delete(groupId);
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
         }
     }
 }

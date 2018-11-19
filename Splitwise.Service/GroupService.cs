@@ -10,6 +10,7 @@ namespace Splitwise.Service
     public interface IGroupService
     {
         SaveResultModel<Group> CreateGroup(Group model);
+        int? DeleteGroup(int groupId);
     }
 
     public class GroupService : IGroupService
@@ -58,6 +59,21 @@ namespace Splitwise.Service
                 Model = model,
                 ErrorMessages = errorMessages
             };
+        }
+
+        public int? DeleteGroup(int groupId)
+        {
+            var groupInDb = _groupRepository.GetById(groupId);
+
+            if(groupInDb == null)
+            {
+                return null;
+            }
+
+            _groupRepository.Delete(groupInDb);
+            _unitOfWork.Commit();
+
+            return groupInDb.Id;
         }
     }
 }

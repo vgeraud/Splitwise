@@ -30,5 +30,18 @@ namespace Splitwise.Controllers
 
             return BadRequest(string.Join(". ", saveResult.ErrorMessages));
         }
+
+        [HttpDelete]
+        public IHttpActionResult Delete(int groupId)
+        {
+            var isDeleted = _groupService.DeleteGroup(groupId) != null;
+
+            if(!isDeleted)
+            {
+                return BadRequest("Does not exist.");
+            }
+
+            return Ok();
+        }
     }
 }

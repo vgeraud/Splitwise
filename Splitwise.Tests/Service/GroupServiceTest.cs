@@ -18,7 +18,7 @@ namespace Splitwise.Tests.Service
         private IValidator<Group> groupValidator => new GroupValidator();
 
         [TestMethod]
-        public void CreateGroup_ValidModel_ReturnsId()
+        public void CreateGroup_ValidModel_ReturnsSuccessTrue()
         {
             var groupRepositoryMock = new Mock<IGroupRepository>();
             var fakeGroup = new Group
@@ -38,7 +38,7 @@ namespace Splitwise.Tests.Service
         }
 
         [TestMethod]
-        public void CreateGroup_InvalidModel_ReturnsNull()
+        public void CreateGroup_InvalidModel_ReturnsSuccessFalse()
         {
             var groupRepositoryMock = new Mock<IGroupRepository>();
             var fakeGroup = new Group
@@ -55,7 +55,7 @@ namespace Splitwise.Tests.Service
         }
 
         [TestMethod]
-        public void CreateGroup_ExistingGroup_ReturnsId()
+        public void CreateGroup_ExistingGroup_ReturnsSucessFalse()
         {
             var fakeGroup = new Group
             {
@@ -71,6 +71,35 @@ namespace Splitwise.Tests.Service
             Assert.IsTrue(saveResult != null);
             Assert.IsFalse(saveResult.Success);
             Assert.IsTrue(saveResult.ErrorMessages.Count == 1);
+        }
+
+        [TestMethod]
+        public void DeleteGroup_ExistingGroup_ReturnsId()
+        {
+            var groupId = 1;
+
+            var groupRepositoryMock = new Mock<IGroupRepository>();
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns(new Group { Id = groupId, Name = "MyName" });
+
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), Mock.Of<IValidator<Group>>());
+            var result = service.DeleteGroup(groupId);
+
+            Assert.IsTrue(result.HasValue);
+            Assert.AreEqual(result, groupId);
+        }
+
+        [TestMethod]
+        public void DeleteGroup_NotExistingGroup_ReturnsNull()
+        {
+            var groupId = 1;
+
+            var groupRepositoryMock = new Mock<IGroupRepository>();
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns((Group)null);
+
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), Mock.Of<IValidator<Group>>());
+            var result = service.DeleteGroup(groupId);
+
+            Assert.IsFalse(result.HasValue);
         }
     }
 }
