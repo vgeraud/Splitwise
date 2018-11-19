@@ -10,6 +10,7 @@ namespace Splitwise.Service
     public interface IGroupService
     {
         SaveResultModel<Group> CreateGroup(Group model);
+        Group GetGroup(int id);
     }
 
     public class GroupService : IGroupService
@@ -23,6 +24,10 @@ namespace Splitwise.Service
             _groupRepository = groupRepository;
             _unitOfWork = unitOfWork;
             _groupValidator = groupValidator;
+        }
+
+        public Group GetGroup(int id) {
+            return _groupRepository.GetById(id);
         }
 
         public SaveResultModel<Group> CreateGroup(Group model)
