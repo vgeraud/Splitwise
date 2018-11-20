@@ -24,7 +24,7 @@ namespace Splitwise.Tests.Service
         UserService _userService;
 
        [TestMethod]
-        public void CreateUser_UserIsCreated()
+        public void AddFriend()
         {
             User userPrincipal = new User();
             userPrincipal.Id = 1;
@@ -38,6 +38,11 @@ namespace Splitwise.Tests.Service
             friendToAdd.Email = "friendUser@server.com";
             friendToAdd.PhoneNumber = "514111111";
 
+            SetupMocks(new List<User> {
+                userPrincipal
+                });
+            _userService.CreateUser(userPrincipal);
+
             SaveResultModel<User> result =_userService.AddFriend(userPrincipal, friendToAdd);
             User UserModified = _userService.GetUser(userPrincipal.Id);
 
@@ -45,7 +50,17 @@ namespace Splitwise.Tests.Service
             Assert.IsTrue(UserModified.Friends.Count == 1);
         }
 
+        private void SetupMocks(List<User> data)
+        {
+            _factoryMock = new Mock<IDbFactory>();
+            _contextMock = new Mock<SplitwiseContext>();
+            _dataMock = TestHelper.GetQueryableMockDbSet<User>(data);
+            _contextMock.Setup(c => c.Set<User>()).Returns(_dataMock.Object);
+            _factoryMock.Setup(f => f.Init()).Returns(_contextMock.Object);
 
+            _userRepository = new UserRepository(_factoryMock.Object);
+            _userService = new UserService(_userRepository, Mock.Of<IUnitOfWork>(), new UserValidator());
+        }
 
     }
 }

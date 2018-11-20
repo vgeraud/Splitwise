@@ -64,6 +64,10 @@ namespace Splitwise.Service
         {
             var result = new SaveResultModel<User> { Model = user };
 
+            if(user.Friends == null)
+            {
+                user.Friends = new List<User>();
+            }
             user.Friends.Add(friend);
             this._userRepository.Update(user);
             _unitOfWork.Commit();
