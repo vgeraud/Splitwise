@@ -15,6 +15,7 @@ namespace Splitwise.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IHttpActionResult CreateUser(User user)
         {
             try
@@ -29,6 +30,7 @@ namespace Splitwise.Controllers
 
                 if (saveResult.Success)
                 {
+                    saveResult.Model.Password = "";
                     return Ok(saveResult.Model);
                 }
 
