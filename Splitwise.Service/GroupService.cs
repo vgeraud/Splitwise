@@ -10,6 +10,7 @@ namespace Splitwise.Service
     public interface IGroupService
     {
         SaveResultModel<Group> CreateGroup(Group model);
+        Expense AddExpense(Group group, Expense expense);
         Group GetGroup(int id);
     }
 
@@ -63,6 +64,14 @@ namespace Splitwise.Service
                 Model = model,
                 ErrorMessages = errorMessages
             };
+        }
+
+        public Expense AddExpense(Group group, Expense expense)
+        {
+            group.expenses.Add(expense);
+
+            // Modifier le group
+            return null;
         }
     }
 }

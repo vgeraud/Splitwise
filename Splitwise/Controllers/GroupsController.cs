@@ -56,10 +56,8 @@ namespace Splitwise.Controllers
                 return BadRequest(string.Join(". ", saveResult.ErrorMessages));
             }
 
-            group.expenses.Add(saveResult.Model);
-
-            //Updater group
-            return null;
+            _groupService.AddExpense(group, saveResult.Model);
+            return Ok(saveResult.Model);
         }
     }
 }
