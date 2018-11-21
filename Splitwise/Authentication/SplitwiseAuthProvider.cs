@@ -32,7 +32,7 @@ namespace Splitwise.Authentication
             context.OwinContext.Response.Headers.Add("Access-Control-Allow-Origin", new[] { "*" });
             if (_userService.AuthenticateUser(context.UserName, context.Password))            
             {
-                identity.AddClaim(new Claim("user", context.UserName));
+                identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, context.UserName));
 
                 var props = new AuthenticationProperties(new Dictionary<string, string>
                 {

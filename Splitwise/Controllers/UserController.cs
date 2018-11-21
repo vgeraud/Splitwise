@@ -1,7 +1,9 @@
 ﻿using Splitwise.Models;
 using Splitwise.Service;
 using System;
+using System.Security.Claims;
 using System.Web.Http;
+using System.Linq;
 
 namespace Splitwise.Controllers
 {
@@ -19,7 +21,7 @@ namespace Splitwise.Controllers
         public IHttpActionResult CreateUser(User user)
         {
             try
-            {
+            {                
                 if (user == null)
                 {
                     return BadRequest();
@@ -56,6 +58,13 @@ namespace Splitwise.Controllers
             };
 
             return Ok(model);
+        }
+
+        private string GetUsernameInSession()
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            Claim identityClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            return identityClaim?.Value;
         }
     }
 }
