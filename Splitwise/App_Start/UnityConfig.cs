@@ -52,6 +52,7 @@ namespace Splitwise
             // container.RegisterType<IProductRepository, ProductRepository>();
 
             container.RegisterType<ExpenseController>();
+            container.RegisterType<UserController>();
             container.RegisterType<GroupsController>();
 
             container.RegisterType<IDbFactory, DbFactory>();
@@ -63,6 +64,10 @@ namespace Splitwise
 
             container.RegisterType<IExpenseRepository, ExpenseRepository>(factoryInjection);
             container.RegisterType<IExpenseService, ExpenseService>(new InjectionConstructor(new object[] { container.Resolve<IExpenseRepository>(), container.Resolve<IUnitOfWork>() }));
+
+            container.RegisterType<IUserRepository, UserRepository>(factoryInjection);
+            container.RegisterType<IValidator<User>, UserValidator>();
+            container.RegisterType<IUserService, UserService>(new InjectionConstructor(new object[] { container.Resolve<IUserRepository>(), container.Resolve<IUnitOfWork>(), container.Resolve<IValidator<User>>() }));
 
             container.RegisterType<IGroupRepository, GroupRepository>(factoryInjection);
             container.RegisterType<IValidator<Group>, GroupValidator>();
