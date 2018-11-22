@@ -126,10 +126,11 @@ namespace Splitwise.Tests.Service
             friendToAdd.PhoneNumber = "514111111";
 
             SetupMocks(new List<User> {
-                userPrincipal
+                userPrincipal,
+                friendToAdd
             });
 
-            SaveResultModel<User> result = _userService.AddFriend(userPrincipal.Username, friendToAdd);
+            SaveResultModel<User> result = _userService.AddFriend(userPrincipal.Username, friendToAdd.Username);
             User UserModified = _userService.GetUser(userPrincipal.Id);
 
             Assert.IsTrue(result.Success);
@@ -156,10 +157,43 @@ namespace Splitwise.Tests.Service
             userPrincipal.Friends.Add(friendOfUser);
 
             SetupMocks(new List<User> {
-                userPrincipal
+                userPrincipal,
+                friendOfUser
             });
 
-            SaveResultModel<User> result = _userService.AddFriend(userPrincipal.Username, friendOfUser);
+            SaveResultModel<User> result = _userService.AddFriend(userPrincipal.Username, friendOfUser.Username);
+            User UserModified = _userService.GetUser(userPrincipal.Id);
+
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(UserModified.Friends.Count == 1);
+        }
+
+        [TestMethod]
+        public void AddFriend_Validate_CannotCreateLinkOfInexistentUsername()
+        {
+            User userPrincipal = new User();
+            userPrincipal.Id = 1;
+            userPrincipal.Username = "userPrincipal";
+            userPrincipal.Email = "userPrincipal@server.com";
+            userPrincipal.PhoneNumber = "514111111";
+
+            User friendOfUser = new User();
+            friendOfUser.Id = 2;
+            friendOfUser.Username = "friendUser";
+            friendOfUser.Email = "friendUser@server.com";
+            friendOfUser.PhoneNumber = "514111111";
+
+            userPrincipal.Friends = new List<User>();
+            userPrincipal.Friends.Add(friendOfUser);
+
+            string usernameInExistent = "usernameInExistent";
+
+            SetupMocks(new List<User> {
+                userPrincipal,
+                friendOfUser
+            });
+
+            SaveResultModel<User> result = _userService.AddFriend(userPrincipal.Username, usernameInExistent);
             User UserModified = _userService.GetUser(userPrincipal.Id);
 
             Assert.IsFalse(result.Success);
@@ -185,10 +219,11 @@ namespace Splitwise.Tests.Service
             userPrincipal.Friends.Add(friendOfUser);
 
             SetupMocks(new List<User> {
-                userPrincipal
+                userPrincipal,
+                friendOfUser
             });
 
-            SaveResultModel<User> result = _userService.RemoveFriend(userPrincipal.Username, friendOfUser);
+            SaveResultModel<User> result = _userService.RemoveFriend(userPrincipal.Username, friendOfUser.Username);
             User UserModified = _userService.GetUser(userPrincipal.Id);
 
             Assert.IsTrue(result.Success);
@@ -220,16 +255,49 @@ namespace Splitwise.Tests.Service
             userPrincipal.Friends.Add(friendOfUser);
 
             SetupMocks(new List<User> {
-                userPrincipal
+                userPrincipal,
+                friendOfUser,
+                notFriendOfUser
             });
 
-            SaveResultModel<User> result = _userService.RemoveFriend(userPrincipal.Username, notFriendOfUser);
+            SaveResultModel<User> result = _userService.RemoveFriend(userPrincipal.Username, notFriendOfUser.Username);
             User UserModified = _userService.GetUser(userPrincipal.Id);
 
             Assert.IsFalse(result.Success);
             Assert.IsTrue(UserModified.Friends.Count == 1);
         }
 
+        [TestMethod]
+        public void RemoveFriend_Validate_CannotEliminateLinkOfInexistentUsername()
+        {
+            User userPrincipal = new User();
+            userPrincipal.Id = 1;
+            userPrincipal.Username = "userPrincipal";
+            userPrincipal.Email = "userPrincipal@server.com";
+            userPrincipal.PhoneNumber = "514111111";
+
+            User friendOfUser = new User();
+            friendOfUser.Id = 2;
+            friendOfUser.Username = "friendUser";
+            friendOfUser.Email = "friendUser@server.com";
+            friendOfUser.PhoneNumber = "514111111";
+
+            userPrincipal.Friends = new List<User>();
+            userPrincipal.Friends.Add(friendOfUser);
+
+            string usernameInExistent = "usernameInExistent";
+
+            SetupMocks(new List<User> {
+                userPrincipal,
+                friendOfUser
+            });
+
+            SaveResultModel<User> result = _userService.RemoveFriend(userPrincipal.Username, usernameInExistent);
+            User UserModified = _userService.GetUser(userPrincipal.Id);
+
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(UserModified.Friends.Count == 1);
+        }
 
         private void SetupMocks(List<User> data)
         {

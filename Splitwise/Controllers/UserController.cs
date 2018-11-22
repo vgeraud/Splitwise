@@ -68,16 +68,16 @@ namespace Splitwise.Controllers
 
         [HttpPost]
         [Authorize]
-        public IHttpActionResult AddFriend(User friend)
+        public IHttpActionResult AddFriend(string friendUsername)
         {
             try
             {
-                if (friend == null)
+                if (friendUsername == null)
                 {
                     return BadRequest();
                 }
 
-                var saveResult = _userService.AddFriend(GetUsernameInSession(), friend);
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friendUsername);
 
                 if (saveResult.Success)
                 {
@@ -97,16 +97,16 @@ namespace Splitwise.Controllers
 
         [HttpPost]
         [Authorize]
-        public IHttpActionResult RemoveFriend(User friend)
+        public IHttpActionResult RemoveFriend(string friendUsername)
         {
             try
             {
-                if (friend == null)
+                if (friendUsername == null)
                 {
                     return BadRequest();
                 }
 
-                var saveResult = _userService.AddFriend(GetUsernameInSession(), friend);
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friendUsername);
 
                 if (saveResult.Success)
                 {

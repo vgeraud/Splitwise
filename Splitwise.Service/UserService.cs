@@ -13,8 +13,8 @@ namespace Splitwise.Service
         SaveResultModel<User> CreateUser(User userToSave);
 
         bool AuthenticateUser(string username, string password);
-        SaveResultModel<User> AddFriend(string username, User friend);
-        SaveResultModel<User> RemoveFriend(string username, User friend);
+        SaveResultModel<User> AddFriend(string username, string friend);
+        SaveResultModel<User> RemoveFriend(string username, string friend);
     }
 
     public class UserService : IUserService
@@ -78,16 +78,22 @@ namespace Splitwise.Service
             return user == null? false : SecurePasswordHasher.Verify(password, user.Password);
         }
 
-        public SaveResultModel<User> AddFriend(string username, User friend)
+        public SaveResultModel<User> AddFriend(string username, string friendUsername)
         {
             var user = GetUserByUsername(username);
             var result = new SaveResultModel<User> { Model = user };
+            var friend = GetUserByUsername(friendUsername);
 
-            if(user.Friends == null)
+            if (user.Friends == null)
             {
                 user.Friends = new List<User>();
             }
-            if (!user.Friends.Contains(friend))
+
+            if(friend == null)
+            {
+                result.ErrorMessages = new List<string> { "The person you are trying to add is not a valid user." };
+            }
+            else if (!user.Friends.Contains(friend))
             {
                 user.Friends.Add(friend);
                 this._userRepository.Update(user);
@@ -102,14 +108,19 @@ namespace Splitwise.Service
             return result;
         }
 
-        public SaveResultModel<User> RemoveFriend(string username, User friend)
+        public SaveResultModel<User> RemoveFriend(string username, string friendUsername)
         {
             var user = GetUserByUsername(username);
             var result = new SaveResultModel<User> { Model = user };
+            var friend = GetUserByUsername(friendUsername);
 
             if (user.Friends != null)
             {
-                if (user.Friends.Contains(friend))
+                if (friend == null)
+                {
+                    result.ErrorMessages = new List<string> { "The person you are trying to remove is not a valid user." };
+                }
+                else if (user.Friends.Contains(friend))
                 {
                     user.Friends.Remove(friend);
                     this._userRepository.Update(user);
