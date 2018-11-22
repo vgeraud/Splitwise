@@ -14,6 +14,7 @@ namespace Splitwise.Service
 
         bool AuthenticateUser(string username, string password);
         SaveResultModel<User> AddFriend(User user, User friend);
+        SaveResultModel<User> RemoveFriend(User user, User friend);
     }
 
     public class UserService : IUserService
