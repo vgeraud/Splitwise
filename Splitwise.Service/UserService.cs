@@ -13,8 +13,8 @@ namespace Splitwise.Service
         SaveResultModel<User> CreateUser(User userToSave);
 
         bool AuthenticateUser(string username, string password);
-        SaveResultModel<User> AddFriend(User user, User friend);
-        SaveResultModel<User> RemoveFriend(User user, User friend);
+        SaveResultModel<User> AddFriend(string username, User friend);
+        SaveResultModel<User> RemoveFriend(string username, User friend);
     }
 
     public class UserService : IUserService
@@ -66,40 +66,61 @@ namespace Splitwise.Service
             return user;
         }
 
+        public User GetUserByUsername(string username)
+        {
+            var user = _userRepository.Get(u => u.Username == username);
+            return user;
+        }
+
         public bool AuthenticateUser(string username, string password)
         {
             var user = _userRepository.Get(g => g.Username == username);
             return user == null? false : SecurePasswordHasher.Verify(password, user.Password);
         }
 
-        public SaveResultModel<User> AddFriend(User user, User friend)
+        public SaveResultModel<User> AddFriend(string username, User friend)
         {
+            var user = GetUserByUsername(username);
             var result = new SaveResultModel<User> { Model = user };
 
             if(user.Friends == null)
             {
                 user.Friends = new List<User>();
             }
-            user.Friends.Add(friend);
-            this._userRepository.Update(user);
-            _unitOfWork.Commit();
-
-            result.Success = true;
+            if (!user.Friends.Contains(friend))
+            {
+                user.Friends.Add(friend);
+                this._userRepository.Update(user);
+                _unitOfWork.Commit();
+                result.Success = true;
+            }
+            else
+            {
+                result.ErrorMessages = new List<string> { "The person you are trying to add is already your friend." };
+            }
 
             return result;
         }
 
-        public SaveResultModel<User> RemoveFriend(User user, User friend)
+        public SaveResultModel<User> RemoveFriend(string username, User friend)
         {
+            var user = GetUserByUsername(username);
             var result = new SaveResultModel<User> { Model = user };
 
             if (user.Friends != null)
             {
-                user.Friends.Remove(friend);
-                this._userRepository.Update(user);
-                _unitOfWork.Commit();
+                if (user.Friends.Contains(friend))
+                {
+                    user.Friends.Remove(friend);
+                    this._userRepository.Update(user);
+                    _unitOfWork.Commit();
 
-                result.Success = true;
+                    result.Success = true;
+                }
+                else
+                {
+                    result.ErrorMessages = new List<string> { "The person you are trying to remove is not your friend." };
+                }
             }
 
             return result;
