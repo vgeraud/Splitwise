@@ -68,7 +68,36 @@ namespace Splitwise.Controllers
 
         [HttpPost]
         [Authorize]
-        public IHttpActionResult AddFriendToUser(User friend)
+        public IHttpActionResult AddFriend(User friend)
+        {
+            try
+            {
+                if (friend == null)
+                {
+                    return BadRequest();
+                }
+
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friend);
+
+                if (saveResult.Success)
+                {
+                    saveResult.Model.Password = "";
+                    return Ok(saveResult.Model);
+                }
+
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+            catch (Exception ex)
+            {
+                //TODO: log exception
+                return this.InternalServerError(ex);
+            }
+
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IHttpActionResult RemoveFriend(User friend)
         {
             try
             {
