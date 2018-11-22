@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Headers;
 using System.Web.Http;
+using System.Web.Http.Cors;
 
 namespace Splitwise
 {
@@ -10,10 +11,9 @@ namespace Splitwise
 
             config.DependencyResolver = new UnityResolver(UnityConfig.Container);
 
-
             // Web API configuration and services
-            config.Formatters.JsonFormatter.SupportedMediaTypes
-                .Add(new MediaTypeHeaderValue("text/html"));
+            EnableCorsAttribute cors = new EnableCorsAttribute("*", "*", "*");
+            config.EnableCors(cors);
 
             // Web API routes
             config.MapHttpAttributeRoutes();
@@ -23,6 +23,10 @@ namespace Splitwise
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            config.Formatters.JsonFormatter.SupportedMediaTypes
+                .Add(new MediaTypeHeaderValue("text/html"));
+
         }
     }
 }

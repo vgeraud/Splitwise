@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using Splitwise.Models;
 using Splitwise.Model.Validators;
 using Splitwise.Model;
+using Splitwise.Service.Helpers;
 
 namespace Splitwise.Service
 {
     public interface IUserService
     {
         SaveResultModel<User> CreateUser(User userToSave);
+
+        bool AuthenticateUser(string username, string password);
         SaveResultModel<User> AddFriend(User user, User friend);
     }
 
@@ -25,7 +28,7 @@ namespace Splitwise.Service
             this._unitOfWork = unitOfWork;
             this._userValidator = userValidator;
         }
-
+        
         public SaveResultModel<User> CreateUser(User userToSave)
         {
             var result = new SaveResultModel<User> { Model = userToSave };
@@ -47,6 +50,8 @@ namespace Splitwise.Service
                 return result;
             }
 
+            userToSave.Password = SecurePasswordHasher.Hash(userToSave.Password);
+
             this._userRepository.Add(userToSave);
             _unitOfWork.Commit();
 
@@ -58,6 +63,12 @@ namespace Splitwise.Service
         {
             var user = _userRepository.Get(u => u.Id == id);
             return user;
+        }
+
+        public bool AuthenticateUser(string username, string password)
+        {
+            var user = _userRepository.Get(g => g.Username == username);
+            return user == null? false : SecurePasswordHasher.Verify(password, user.Password);
         }
 
         public SaveResultModel<User> AddFriend(User user, User friend)
