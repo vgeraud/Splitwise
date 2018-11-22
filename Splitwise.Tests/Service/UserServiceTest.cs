@@ -8,6 +8,7 @@ using Splitwise.Model;
 using Splitwise.Model.Validators;
 using Splitwise.Models;
 using Splitwise.Service;
+using Splitwise.Service.Helpers;
 using System.Collections.Generic;
 using System.Data.Entity;
 
@@ -26,26 +27,27 @@ namespace Splitwise.Tests.Service
        [TestMethod]
         public void CreateUser_UserIsCreated()
         {
+            string originalPwd = "somePwd";
             User userToSave = new User();
             userToSave.Id = 1;
             userToSave.Username = "lcardona";
             userToSave.Email = "email@server.com";
-            userToSave.Password = "somePwd";
+            userToSave.Password = originalPwd;
             userToSave.Currency = Models.Enums.Currency.CAD;
             userToSave.PhoneNumber = "51878928";
-            
+
             List<User> userTable = new List<User>();
 
             SetupMocks(new List<User>());
 
-            SaveResultModel<User>  result =_userService.CreateUser(userToSave);
+            SaveResultModel<User> result = _userService.CreateUser(userToSave);
             User createdUser = _userService.GetUser(userToSave.Id);
 
             _dataMock.Verify(m => m.Add(It.IsAny<User>()), Times.Once);
             Assert.IsTrue(result.Success);
             Assert.IsNotNull(createdUser);
             Assert.AreEqual(createdUser.Username, userToSave.Username);
-            Assert.AreEqual(createdUser.Password, userToSave.Password);
+            Assert.IsTrue(SecurePasswordHasher.Verify(originalPwd, createdUser.Password));
             Assert.AreEqual(createdUser.Currency, userToSave.Currency);
             Assert.AreEqual(createdUser.PhoneNumber, userToSave.PhoneNumber);
         }
@@ -79,7 +81,35 @@ namespace Splitwise.Tests.Service
             SaveResultModel<User> result = _userService.CreateUser(userToSave);
             Assert.IsFalse(result.Success);
         }
-      
+
+        [TestMethod]
+        public void AuthenticateUser_ShouldAuthenticateUser()
+        {
+            var username = "lcardona";
+            var password = "pwd123";
+            SetupMocks(new List<User> {
+                new User() {
+                    Username = username,
+                    Password = SecurePasswordHasher.Hash(password),
+                    }
+                });
+            Assert.IsTrue(_userService.AuthenticateUser(username, password));
+        }
+
+        [TestMethod]
+        public void AuthenticateUser_ShouldNotAuthenticateUser()
+        {
+            var username = "lcardona";
+            var password = "pwd123";
+            SetupMocks(new List<User> {
+                new User() {
+                    Username = username,
+                    Password = SecurePasswordHasher.Hash(password),
+                    }
+                });
+            Assert.IsFalse(_userService.AuthenticateUser(username, "differentPwd"));
+        }
+
         private void SetupMocks(List<User> data)
         {
             _factoryMock = new Mock<IDbFactory>();
