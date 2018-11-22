@@ -79,7 +79,95 @@ namespace Splitwise.Tests.Service
             SaveResultModel<User> result = _userService.CreateUser(userToSave);
             Assert.IsFalse(result.Success);
         }
-      
+
+        [TestMethod]
+        public void AddFriend_CreateLinkBetweenUserAndFriend()
+        {
+            User userPrincipal = new User();
+            userPrincipal.Id = 1;
+            userPrincipal.Username = "userPrincipal";
+            userPrincipal.Email = "userPrincipal@server.com";
+            userPrincipal.PhoneNumber = "514111111";
+
+            User friendToAdd = new User();
+            friendToAdd.Id = 2;
+            friendToAdd.Username = "friendUser";
+            friendToAdd.Email = "friendUser@server.com";
+            friendToAdd.PhoneNumber = "514111111";
+
+            SetupMocks(new List<User> {
+                userPrincipal
+                });
+            _userService.CreateUser(userPrincipal);
+
+            SaveResultModel<User> result = _userService.AddFriend(userPrincipal, friendToAdd);
+            User UserModified = _userService.GetUser(userPrincipal.Id);
+
+            Assert.IsTrue(result.Success);
+            Assert.IsTrue(UserModified.Friends.Count == 1);
+        }
+
+
+        [TestMethod]
+        public void AddFriend_Validate_IfLinkBetweenFriendAndUserAlreadyExist()
+        {
+            User userPrincipal = new User();
+            userPrincipal.Id = 1;
+            userPrincipal.Username = "userPrincipal";
+            userPrincipal.Email = "userPrincipal@server.com";
+            userPrincipal.PhoneNumber = "514111111";
+
+            User friendToAdd = new User();
+            friendToAdd.Id = 2;
+            friendToAdd.Username = "friendUser";
+            friendToAdd.Email = "friendUser@server.com";
+            friendToAdd.PhoneNumber = "514111111";
+
+            userPrincipal.Friends = new List<User>();
+            userPrincipal.Friends.Add(friendToAdd);
+
+            SetupMocks(new List<User> {
+                userPrincipal
+                });
+            _userService.CreateUser(userPrincipal);
+
+            SaveResultModel<User> result = _userService.AddFriend(userPrincipal, friendToAdd);
+            User UserModified = _userService.GetUser(userPrincipal.Id);
+
+            Assert.IsFalse(result.Success);
+            Assert.IsTrue(UserModified.Friends.Count == 1);
+        }
+
+        [TestMethod]
+        public void RemoveFriend_EliminateLinkBetweenUserAndFriend()
+        {
+            User userPrincipal = new User();
+            userPrincipal.Id = 1;
+            userPrincipal.Username = "userPrincipal";
+            userPrincipal.Email = "userPrincipal@server.com";
+            userPrincipal.PhoneNumber = "514111111";
+
+            User friendToAdd = new User();
+            friendToAdd.Id = 2;
+            friendToAdd.Username = "friendUser";
+            friendToAdd.Email = "friendUser@server.com";
+            friendToAdd.PhoneNumber = "514111111";
+
+            userPrincipal.Friends = new List<User>();
+            userPrincipal.Friends.Add(friendToAdd);
+
+            SetupMocks(new List<User> {
+                userPrincipal
+                });
+            _userService.CreateUser(userPrincipal);
+
+            SaveResultModel<User> result = _userService.RemoveFriend(userPrincipal, friendToAdd);
+            User UserModified = _userService.GetUser(userPrincipal.Id);
+
+            Assert.IsTrue(result.Success);
+            Assert.IsTrue(UserModified.Friends.Count == 0);
+        }
+
         private void SetupMocks(List<User> data)
         {
             _factoryMock = new Mock<IDbFactory>();

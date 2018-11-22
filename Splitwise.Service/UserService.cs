@@ -76,5 +76,21 @@ namespace Splitwise.Service
 
             return result;
         }
+
+        public SaveResultModel<User> RemoveFriend(User user, User friend)
+        {
+            var result = new SaveResultModel<User> { Model = user };
+
+            if (user.Friends != null)
+            {
+                user.Friends.Remove(friend);
+                this._userRepository.Update(user);
+                _unitOfWork.Commit();
+
+                result.Success = true;
+            }
+
+            return result;
+        }
     }
 }
