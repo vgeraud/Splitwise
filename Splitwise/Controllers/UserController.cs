@@ -46,7 +46,6 @@ namespace Splitwise.Controllers
             
         }
 
-
         // GET api/user
         [HttpGet]
         public IHttpActionResult Get(int id)
@@ -65,6 +64,64 @@ namespace Splitwise.Controllers
             var identity = User.Identity as ClaimsIdentity;
             Claim identityClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             return identityClaim?.Value;
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IHttpActionResult AddFriend(string friendUsername)
+        {
+            try
+            {
+                if (friendUsername == null)
+                {
+                    return BadRequest();
+                }
+
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friendUsername);
+
+                if (saveResult.Success)
+                {
+                    saveResult.Model.Password = "";
+                    return Ok(saveResult.Model);
+                }
+
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+            catch (Exception ex)
+            {
+                //TODO: log exception
+                return this.InternalServerError(ex);
+            }
+
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IHttpActionResult RemoveFriend(string friendUsername)
+        {
+            try
+            {
+                if (friendUsername == null)
+                {
+                    return BadRequest();
+                }
+
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friendUsername);
+
+                if (saveResult.Success)
+                {
+                    saveResult.Model.Password = "";
+                    return Ok(saveResult.Model);
+                }
+
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+            catch (Exception ex)
+            {
+                //TODO: log exception
+                return this.InternalServerError(ex);
+            }
+
         }
     }
 }
