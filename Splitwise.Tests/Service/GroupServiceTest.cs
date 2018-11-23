@@ -101,5 +101,59 @@ namespace Splitwise.Tests.Service
 
             Assert.IsFalse(result.HasValue);
         }
+
+        [TestMethod]
+        public void ModifyGroup_ExistingGroup_ReturnsUpdatedSaveModel()
+        {
+            var fakeGroup = new Group { Id = 1, Name = "MyGroup", Category = GroupCategory.Entertainment };
+
+            var groupRepositoryMock     = new Mock<IGroupRepository>();
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns(new Group { Id = 1, Name = "OldGroup", Category = GroupCategory.Friends });
+
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), groupValidator);
+            var result = service.ModifyGroup(fakeGroup);
+
+            Assert.IsTrue(result != null);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(result.Model.Id, fakeGroup.Id);
+            Assert.AreEqual(result.Model.Name, fakeGroup.Name);
+            Assert.AreEqual(result.Model.Category, fakeGroup.Category);
+            Assert.IsTrue(result.ErrorMessages.Count == 0);
+
+        }
+
+        [TestMethod]
+        public void ModifyGroup_NotExistingGroup_ReturnsSuccessFalse()
+        {
+            var fakeGroup = new Group { Id = 1, Name = "MyGroup", Category = GroupCategory.Entertainment };
+
+            var groupRepositoryMock = new Mock<IGroupRepository>();
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns((Group)null);
+
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), groupValidator);
+            var result = service.ModifyGroup(fakeGroup);
+
+            Assert.IsTrue(result != null);
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(result.Model, null);
+            Assert.IsTrue(result.ErrorMessages.Count == 1);
+        }
+
+        [TestMethod]
+        public void ModifyGroup_InvalidGroupModel_ReturnsSuccessFalse()
+        {
+            var fakeGroup = new Group { Id = 1, CurrentBalance = 0 };
+
+            var groupRepositoryMock = new Mock<IGroupRepository>();
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns(new Group { Id = 1, Name = "OldGroup", Category = GroupCategory.Friends });
+
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), groupValidator);
+            var result = service.ModifyGroup(fakeGroup);
+
+            Assert.IsTrue(result != null);
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(result.Model, null);
+            Assert.IsTrue(result.ErrorMessages.Count == 1);
+        }
     }
 }

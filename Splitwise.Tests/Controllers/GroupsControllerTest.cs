@@ -65,6 +65,44 @@ namespace Splitwise.Tests.Controllers
         }
 
         [TestMethod]
+        public void ModifyGroup_InvalidGroup_ReturnsBadRequest()
+        {
+            var fakeSaveResult = new SaveResultModel<Group>
+            {
+                Model = null,
+                Success = false
+            };
+
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.ModifyGroup(It.IsAny<Group>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object);
+
+            var result = controller.Put(null);
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void ModifyGroup_ValidGroup_ReturnsOk()
+        {
+            var fakeSaveResult = new SaveResultModel<Group>
+            {
+                Model = null,
+                Success = true
+            };
+
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.ModifyGroup(It.IsAny<Group>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object);
+
+            var result = controller.Put(new Group { Name = "Group" });
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(OkNegotiatedContentResult<Group>));
+        }
+
+        [TestMethod]
         public void DeleteGroup_ExistingGroup_ReturnsOk()
         {
             var groupId = 1;

@@ -31,6 +31,24 @@ namespace Splitwise.Controllers
             return BadRequest(string.Join(". ", saveResult.ErrorMessages));
         }
 
+        [HttpPut]
+        public IHttpActionResult Put(Group groupModel)
+        {
+            if (groupModel == null)
+            {
+                return BadRequest();
+            }
+
+            var saveResult = _groupService.ModifyGroup(groupModel);
+
+            if (saveResult.Success)
+            {
+                return Ok(saveResult.Model);
+            }
+
+            return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+        }
+
         [HttpDelete]
         public IHttpActionResult Delete(int groupId)
         {

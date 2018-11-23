@@ -10,6 +10,7 @@ namespace Splitwise.Service
     public interface IGroupService
     {
         SaveResultModel<Group> CreateGroup(Group model);
+        SaveResultModel<Group> ModifyGroup(Group model);
         int? DeleteGroup(int groupId);
     }
 
@@ -57,6 +58,46 @@ namespace Splitwise.Service
             {
                 Success = true,
                 Model = model,
+                ErrorMessages = errorMessages
+            };
+        }
+
+        public SaveResultModel<Group> ModifyGroup(Group model)
+        {
+            if (!_groupValidator.Validate(model, out var errorMessages))
+            {
+                return new SaveResultModel<Group>
+                {
+                    Model = null,
+                    Success = false,
+                    ErrorMessages = errorMessages
+                };   
+            }
+
+            var groupInDb = _groupRepository.GetById(model.Id);
+
+            if (groupInDb == null)
+            {
+                return new SaveResultModel<Group>
+                {
+                    Model = null,
+                    Success = false,
+                    ErrorMessages = new List<string> { "Group does not exist." }
+                };
+            }
+
+            groupInDb.Name = model.Name;
+            groupInDb.Category = model.Category;
+            groupInDb.CurrentBalance = model.CurrentBalance;
+            groupInDb.Users = model.Users;
+
+            _groupRepository.Update(model);
+            _unitOfWork.Commit();
+
+            return new SaveResultModel<Group>
+            {
+                Model = groupInDb,
+                Success = true,
                 ErrorMessages = errorMessages
             };
         }
