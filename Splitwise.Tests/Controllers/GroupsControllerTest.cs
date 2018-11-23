@@ -109,5 +109,38 @@ namespace Splitwise.Tests.Controllers
             Assert.IsTrue(result != null);
             Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
         }
+
+        [TestMethod]
+        public void PostExpense_CorrectExpense_ReturnOk()
+        {
+            var fakeExpense = new Expense
+            {
+                Description = "tmp",
+                Type = ExpenseType.Entertainment,
+                Date = DateTime.Now,
+                Currency = Currency.CAD,
+                IsTaxIncluded = true,
+                CurrentAmount = 1,
+                InitialAmount = 1,
+                Payer = new User()
+            };
+
+            var fakeSaveResult = new SaveResultModel<Expense>
+            {
+                Model = fakeExpense,
+                Success = true
+            };
+
+            var expenseServiceMock = new Mock<IExpenseService>();
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns(new Group());
+            expenseServiceMock.Setup(m => m.CreateExpense(It.IsAny<Expense>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object, expenseServiceMock.Object);
+
+            var result = controller.PostExpense(10, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(OkNegotiatedContentResult<Expense>));
+        }
     }
 }
