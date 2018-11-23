@@ -1,5 +1,7 @@
 ﻿using Splitwise.Data.Infrastructure;
 using Splitwise.Data.Repositories;
+using Splitwise.Model;
+using Splitwise.Model.Validators;
 using Splitwise.Models;
 using System.Collections.Generic;
 
@@ -7,59 +9,59 @@ namespace Splitwise.Service
 {
     public interface IExpenseService
     {
-        IEnumerable<Expense> GetExpenses();
-        Expense GetExpense(int id);
-        void CreateExpense(Expense expense);
-        void SaveExpense();
-
-        decimal DoubleUpExpense(int expenseId);
+        SaveResultModel<Expense> CreateExpense(Expense expense);
     }
 
     public class ExpenseService : IExpenseService
     {
         private readonly IExpenseRepository _expenseRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IValidator<Expense> _expenseValidator;
 
-        public ExpenseService(IExpenseRepository expenseRepository, IUnitOfWork unitOfWork)
+        public ExpenseService(IExpenseRepository expenseRepository, IUnitOfWork unitOfWork, IValidator<Expense> expenseValidator)
         {
             this._expenseRepository = expenseRepository;
             this._unitOfWork = unitOfWork;
+            this._expenseValidator = expenseValidator;
         }
 
-        #region IExpenseService Members
+        public SaveResultModel<Expense> CreateExpense(Expense model)
+        {
+            if (!_expenseValidator.Validate(model, out var errorMessages))
+            {
+                return new SaveResultModel<Expense>
+                {
+                    Success = false,
+                    Model = model,
+                    ErrorMessages = errorMessages
+                };
+            }
 
-        public IEnumerable<Expense> GetExpenses()
-        {
-            var expenses = _expenseRepository.GetAll();
-            return expenses;
-        }
-        
-        public Expense GetExpense(int id)
-        {
-            var expense = _expenseRepository.GetById(id);
-            return expense;
-        }
+            var alreadyExists = _expenseRepository.Get(g => g.Description == model.Description
+                                                        && g.CurrentAmount == model.CurrentAmount
+                                                        && g.InitialAmount == model.InitialAmount
+                                                        && g.Payer == model.Payer) != null;
 
-        public void CreateExpense(Expense expense)
-        {
-            _expenseRepository.Add(expense);
-        }
+            if (alreadyExists)
+            {
+                return new SaveResultModel<Expense>
+                {
+                    Success = false,
+                    Model = model,
+                    ErrorMessages = new List<string> { "A expense with the same description, amount and payer already exists." }
+                };
+            }
 
-        public void SaveExpense()
-        {
+            _expenseRepository.Add(model);
             _unitOfWork.Commit();
+
+            return new SaveResultModel<Expense>
+            {
+                Success = true,
+                Model = model,
+                ErrorMessages = errorMessages
+            };
         }
 
-
-        //ceci est just une function bidon pour illustrer l'utilisation des mocks et l'injection de dépendances. On peut l'enlever après
-        public decimal DoubleUpExpense(int expenseId)
-        {
-            var expense = _expenseRepository.GetById(expenseId);
-            decimal result = (decimal) expense.CurrentAmount * 2;
-            return result;
-
-        }
-
-        #endregion
     }
 }
