@@ -110,6 +110,33 @@ namespace Splitwise.Tests.Service
             Assert.IsFalse(_userService.AuthenticateUser(username, "differentPwd"));
         }
 
+
+        [TestMethod]
+        public void UpdateUser_ShouldUpdateUser()
+        {
+            User userInfoUpdate = new User();
+            userInfoUpdate.Username = "lcardona";
+            userInfoUpdate.Email = "email@server.com";
+            userInfoUpdate.Currency = Models.Enums.Currency.CAD;
+            userInfoUpdate.Password = "new password!";
+
+            User existingUser = new User();
+            existingUser.Username = "lcardona";
+            existingUser.PhoneNumber = "43143679";
+            existingUser.Currency = Models.Enums.Currency.USD;
+
+            SetupMocks(new List<User> {
+                existingUser
+                });
+
+            var result = _userService.UpdateUser(userInfoUpdate);
+            Assert.IsTrue(result.Success);
+            Assert.AreEqual(result.Model.Email, userInfoUpdate.Email);
+            Assert.AreEqual(result.Model.Currency, userInfoUpdate.Currency);
+            Assert.AreEqual(result.Model.PhoneNumber, existingUser.PhoneNumber);
+            Assert.IsTrue(SecurePasswordHasher.Verify(userInfoUpdate.Password, result.Model.Password));
+        }
+
         private void SetupMocks(List<User> data)
         {
             _factoryMock = new Mock<IDbFactory>();
