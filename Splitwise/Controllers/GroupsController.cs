@@ -16,6 +16,7 @@ namespace Splitwise.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IHttpActionResult Post(Group groupModel)
         {
             if (groupModel == null)
@@ -34,6 +35,7 @@ namespace Splitwise.Controllers
         }
 
         [HttpPut]
+        [Authorize]
         public IHttpActionResult Put(Group groupModel)
         {
             if (groupModel == null)
@@ -53,6 +55,7 @@ namespace Splitwise.Controllers
         }
 
         [HttpDelete]
+        [Authorize]
         public IHttpActionResult Delete(int groupId)
         {
             var isDeleted = _groupService.DeleteGroup(groupId) != null;
@@ -66,6 +69,7 @@ namespace Splitwise.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Route("groups/{id}/expenses")]
         public IHttpActionResult PostExpense(int id, Expense expense)
         {
