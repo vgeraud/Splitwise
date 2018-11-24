@@ -18,7 +18,38 @@ namespace Splitwise.Tests.Service
         private IValidator<Group> groupValidator => new GroupValidator();
 
         [TestMethod]
-        public void CreateGroup_ValidModel_ReturnsSuccessTrue()
+        public void GetGroup_InvalideId_ReturnNull()
+        {
+            var groupRepositoryMock = new Mock<IGroupRepository>();
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns<Group>(null);
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), groupValidator);
+
+            var group = service.GetGroup(12);
+
+            Assert.IsNull(group);
+        }
+
+        [TestMethod]
+        public void GetGroup_ValideId_ReturnModel()
+        {
+            var groupRepositoryMock = new Mock<IGroupRepository>();
+            var fakeGroup = new Group
+            {
+                Name = "MyGroup",
+                Category = GroupCategory.Entertainment,
+                CurrentBalance = 0,
+                Users = new List<User> { new User { Username = "Test" } }
+            };
+            groupRepositoryMock.Setup(m => m.GetById(It.IsAny<int>())).Returns(fakeGroup);
+
+            var service = new GroupService(groupRepositoryMock.Object, Mock.Of<IUnitOfWork>(), groupValidator);
+            var group = service.GetGroup(12);
+
+            Assert.IsNotNull(group);
+        }
+
+        [TestMethod]
+        public void CreateGroup_ValidModel_ReturnsId()
         {
             var groupRepositoryMock = new Mock<IGroupRepository>();
             var fakeGroup = new Group

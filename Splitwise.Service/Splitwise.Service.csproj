@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="ExpenseService.cs" />
     <Compile Include="GroupService.cs" />
+    <Compile Include="Helpers\SecurePasswordHasher.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserService.cs" />
   </ItemGroup>

@@ -12,6 +12,9 @@ namespace Splitwise.Service
         SaveResultModel<Group> CreateGroup(Group model);
         SaveResultModel<Group> ModifyGroup(Group model);
         int? DeleteGroup(int groupId);
+        void AddExpense(Group group, Expense expense);
+        Group GetGroup(int id);
+
     }
 
     public class GroupService : IGroupService
@@ -25,6 +28,10 @@ namespace Splitwise.Service
             _groupRepository = groupRepository;
             _unitOfWork = unitOfWork;
             _groupValidator = groupValidator;
+        }
+
+        public Group GetGroup(int id) {
+            return _groupRepository.GetById(id);
         }
 
         public SaveResultModel<Group> CreateGroup(Group model)
@@ -106,7 +113,7 @@ namespace Splitwise.Service
         {
             var groupInDb = _groupRepository.GetById(groupId);
 
-            if(groupInDb == null)
+            if (groupInDb == null)
             {
                 return null;
             }
@@ -115,6 +122,14 @@ namespace Splitwise.Service
             _unitOfWork.Commit();
 
             return groupInDb.Id;
+        }
+
+        public void AddExpense(Group group, Expense expense)
+        {
+            group.expenses.Add(expense);
+
+            _groupRepository.Update(group);
+            _unitOfWork.Commit();
         }
     }
 }

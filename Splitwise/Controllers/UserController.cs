@@ -1,7 +1,9 @@
 ﻿using Splitwise.Models;
 using Splitwise.Service;
 using System;
+using System.Security.Claims;
 using System.Web.Http;
+using System.Linq;
 
 namespace Splitwise.Controllers
 {
@@ -15,10 +17,11 @@ namespace Splitwise.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IHttpActionResult CreateUser(User user)
         {
             try
-            {
+            {                
                 if (user == null)
                 {
                     return BadRequest();
@@ -29,6 +32,7 @@ namespace Splitwise.Controllers
 
                 if (saveResult.Success)
                 {
+                    saveResult.Model.Password = "";
                     return Ok(saveResult.Model);
                 }
 
@@ -42,7 +46,6 @@ namespace Splitwise.Controllers
             
         }
 
-
         // GET api/user
         [HttpGet]
         public IHttpActionResult Get(int id)
@@ -54,6 +57,71 @@ namespace Splitwise.Controllers
             };
 
             return Ok(model);
+        }
+
+        private string GetUsernameInSession()
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            Claim identityClaim = identity.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            return identityClaim?.Value;
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IHttpActionResult AddFriend(string friendUsername)
+        {
+            try
+            {
+                if (friendUsername == null)
+                {
+                    return BadRequest();
+                }
+
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friendUsername);
+
+                if (saveResult.Success)
+                {
+                    saveResult.Model.Password = "";
+                    return Ok(saveResult.Model);
+                }
+
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+            catch (Exception ex)
+            {
+                //TODO: log exception
+                return this.InternalServerError(ex);
+            }
+
+        }
+
+        [HttpPost]
+        [Authorize]
+        public IHttpActionResult RemoveFriend(string friendUsername)
+        {
+            try
+            {
+                if (friendUsername == null)
+                {
+                    return BadRequest();
+                }
+
+                var saveResult = _userService.AddFriend(GetUsernameInSession(), friendUsername);
+
+                if (saveResult.Success)
+                {
+                    saveResult.Model.Password = "";
+                    return Ok(saveResult.Model);
+                }
+
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+            catch (Exception ex)
+            {
+                //TODO: log exception
+                return this.InternalServerError(ex);
+            }
+
         }
     }
 }

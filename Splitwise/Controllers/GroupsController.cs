@@ -7,10 +7,12 @@ namespace Splitwise.Controllers
     public class GroupsController : ApiController
     {
         private IGroupService _groupService;
+        private IExpenseService _expenseService;
 
-        public GroupsController(IGroupService groupService)
+        public GroupsController(IGroupService groupService, IExpenseService expenseService)
         {
             _groupService = groupService;
+            _expenseService = expenseService;
         }
 
         [HttpPost]
@@ -39,6 +41,7 @@ namespace Splitwise.Controllers
                 return BadRequest();
             }
 
+
             var saveResult = _groupService.ModifyGroup(groupModel);
 
             if (saveResult.Success)
@@ -54,12 +57,35 @@ namespace Splitwise.Controllers
         {
             var isDeleted = _groupService.DeleteGroup(groupId) != null;
 
-            if(!isDeleted)
+            if (!isDeleted)
             {
                 return BadRequest("Does not exist.");
             }
 
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("groups/{id}/expenses")]
+        public IHttpActionResult PostExpense(int id, Expense expense)
+        {
+            if (expense == null)
+                var group = _groupService.GetGroup(id);
+
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            var saveResult = _expenseService.CreateExpense(expense);
+
+            if (!saveResult.Success)
+            {
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+
+            _groupService.AddExpense(group, saveResult.Model);
+            return Ok(saveResult.Model);
         }
     }
 }

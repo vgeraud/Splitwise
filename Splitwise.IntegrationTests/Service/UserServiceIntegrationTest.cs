@@ -14,13 +14,12 @@ namespace Splitwise.IntegrationTests.Service
         //[TestMethod] are commented out to avoid VS to find them. The tests should only be run when required
 
        //Uncomment to include it as a test
-       // [TestMethod]
+        //[TestMethod]
         public void ShouldSaveUser()
         {
             User userToSave = new User();
-            userToSave.Id = 2;
-            userToSave.Username = "lcardona2";
-            userToSave.Password = "somePwd";
+            userToSave.Username = "admin";
+            userToSave.Password = "adminpwd";
             userToSave.Email = "email@server.com";
             userToSave.Currency = Models.Enums.Currency.CAD;
             userToSave.PhoneNumber = "51878928";
@@ -29,7 +28,8 @@ namespace Splitwise.IntegrationTests.Service
             {
                 DbFactory factory = new DbFactory();
                 UserService service = new UserService(new UserRepository(factory), new UnitOfWork(factory), new UserValidator());
-                service.CreateUser(userToSave);
+                var res = service.CreateUser(userToSave);
+                Assert.IsTrue(res.Success);
             }
             catch (Exception ex)
             {

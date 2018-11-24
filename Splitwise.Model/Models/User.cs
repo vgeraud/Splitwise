@@ -11,7 +11,7 @@ namespace Splitwise.Models
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public Currency Currency { get; set; }
-        public IEnumerable<User> Friends { get; set; }
+        public List<User> Friends { get; set; }
         public IEnumerable<Expense> Expenses { get; set; }
     }
 }

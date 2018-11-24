@@ -4,12 +4,17 @@ using System.Collections.Generic;
 using Splitwise.Models;
 using Splitwise.Model.Validators;
 using Splitwise.Model;
+using Splitwise.Service.Helpers;
 
 namespace Splitwise.Service
 {
     public interface IUserService
     {
         SaveResultModel<User> CreateUser(User userToSave);
+
+        bool AuthenticateUser(string username, string password);
+        SaveResultModel<User> AddFriend(string username, string friend);
+        SaveResultModel<User> RemoveFriend(string username, string friend);
     }
 
     public class UserService : IUserService
@@ -24,7 +29,7 @@ namespace Splitwise.Service
             this._unitOfWork = unitOfWork;
             this._userValidator = userValidator;
         }
-
+        
         public SaveResultModel<User> CreateUser(User userToSave)
         {
             var result = new SaveResultModel<User> { Model = userToSave };
@@ -46,17 +51,90 @@ namespace Splitwise.Service
                 return result;
             }
 
+            userToSave.Password = SecurePasswordHasher.Hash(userToSave.Password);
+
             this._userRepository.Add(userToSave);
             _unitOfWork.Commit();
 
             result.Success = true;
             return result;
-        }        
+        }
 
         public User GetUser(int id)
         {
             var user = _userRepository.Get(u => u.Id == id);
             return user;
+        }
+
+        public User GetUserByUsername(string username)
+        {
+            var user = _userRepository.Get(u => u.Username == username);
+            return user;
+        }
+
+        public bool AuthenticateUser(string username, string password)
+        {
+            var user = _userRepository.Get(g => g.Username == username);
+            return user == null? false : SecurePasswordHasher.Verify(password, user.Password);
+        }
+
+        public SaveResultModel<User> AddFriend(string username, string friendUsername)
+        {
+            var user = GetUserByUsername(username);
+            var result = new SaveResultModel<User> { Model = user };
+            var friend = GetUserByUsername(friendUsername);
+
+            if (user.Friends == null)
+            {
+                user.Friends = new List<User>();
+            }
+
+            if(friend == null)
+            {
+                result.ErrorMessages = new List<string> { "The person you are trying to add is not a valid user." };
+            }
+            else if (!user.Friends.Contains(friend))
+            {
+                user.Friends.Add(friend);
+                this._userRepository.Update(user);
+                _unitOfWork.Commit();
+                result.Success = true;
+            }
+            else
+            {
+                result.ErrorMessages = new List<string> { "The person you are trying to add is already your friend." };
+            }
+
+            return result;
+        }
+
+        public SaveResultModel<User> RemoveFriend(string username, string friendUsername)
+        {
+            var user = GetUserByUsername(username);
+            var result = new SaveResultModel<User> { Model = user };
+            var friend = GetUserByUsername(friendUsername);
+
+            if (user.Friends != null)
+            {
+                if (friend == null)
+                {
+                    result.ErrorMessages = new List<string> { "The person you are trying to remove is not a valid user." };
+                }
+                else if (user.Friends.Contains(friend))
+                {
+                    user.Friends.Remove(friend);
+                    this._userRepository.Update(user);
+                    _unitOfWork.Commit();
+
+                    result.Success = true;
+                }
+                else
+                {
+                    result.ErrorMessages = new List<string> { "The person you are trying to remove is not your friend." };
+                }
+            }
+
+            return result;
         }
     }
 }
