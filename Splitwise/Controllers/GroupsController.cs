@@ -70,7 +70,11 @@ namespace Splitwise.Controllers
         public IHttpActionResult PostExpense(int id, Expense expense)
         {
             if (expense == null)
-                var group = _groupService.GetGroup(id);
+            {
+                return BadRequest();
+            }
+
+            var group = _groupService.GetGroup(id);
 
             if (group == null)
             {
