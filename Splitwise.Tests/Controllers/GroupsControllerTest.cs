@@ -5,6 +5,7 @@ using Splitwise.Model;
 using Splitwise.Models;
 using Splitwise.Models.Enums;
 using Splitwise.Service;
+using System;
 using System.Collections.Generic;
 using System.Web.Http.Results;
 
@@ -37,7 +38,7 @@ namespace Splitwise.Tests.Controllers
 
             var groupServiceMock = new Mock<IGroupService>();
             groupServiceMock.Setup(m => m.CreateGroup(It.IsAny<Group>())).Returns(fakeSaveResult);
-            controller = new GroupsController(groupServiceMock.Object);
+            controller = new GroupsController(groupServiceMock.Object, null);
 
             var result = controller.Post(fakeGroup);
 
@@ -56,12 +57,90 @@ namespace Splitwise.Tests.Controllers
 
             var groupServiceMock = new Mock<IGroupService>();
             groupServiceMock.Setup(m => m.CreateGroup(It.IsAny<Group>())).Returns(fakeSaveResult);
-            controller = new GroupsController(groupServiceMock.Object);
+            controller = new GroupsController(groupServiceMock.Object, null);
 
             var result = controller.Post(null);
 
             Assert.IsTrue(result != null);
             Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void PostExpense_NullExpense_ReturnBadRequest()
+        {
+            controller = new GroupsController(null, null);
+            var result = controller.PostExpense(10, null);
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void PostExpense_IdGroupDosentExist_ReturnNotFound()
+        {
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns<Group>(null);
+            controller = new GroupsController(groupServiceMock.Object, null);
+
+            var result = controller.PostExpense(10, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        }
+
+        [TestMethod]
+        public void PostExpense_ErrorSaveExpense_ReturnBadRequest()
+        {
+            var fakeSaveResult = new SaveResultModel<Expense>
+            {
+                Model = null,
+                Success = false,
+                ErrorMessages = new List<string> { "error." }
+            };
+
+            var expenseServiceMock = new Mock<IExpenseService>();
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns(new Group());
+            expenseServiceMock.Setup(m => m.CreateExpense(It.IsAny<Expense>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object, expenseServiceMock.Object);
+
+            var result = controller.PostExpense(10, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
+        }
+
+        [TestMethod]
+        public void PostExpense_CorrectExpense_ReturnOk()
+        {
+            var fakeExpense = new Expense
+            {
+                Description = "tmp",
+                Type = ExpenseType.Entertainment,
+                Date = DateTime.Now,
+                Currency = Currency.CAD,
+                IsTaxIncluded = true,
+                CurrentAmount = 1,
+                InitialAmount = 1,
+                Payer = new User()
+            };
+
+            var fakeSaveResult = new SaveResultModel<Expense>
+            {
+                Model = fakeExpense,
+                Success = true
+            };
+
+            var expenseServiceMock = new Mock<IExpenseService>();
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns(new Group());
+            expenseServiceMock.Setup(m => m.CreateExpense(It.IsAny<Expense>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object, expenseServiceMock.Object);
+
+            var result = controller.PostExpense(10, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(OkNegotiatedContentResult<Expense>));
         }
     }
 }

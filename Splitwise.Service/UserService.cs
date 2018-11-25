@@ -14,6 +14,8 @@ namespace Splitwise.Service
         SaveResultModel<User> CreateUser(User userToSave);
 
         bool AuthenticateUser(string username, string password);
+        SaveResultModel<User> AddFriend(string username, string friend);
+        SaveResultModel<User> RemoveFriend(string username, string friend);
 
         SaveResultModel<User> UpdateUser(User userInfoUpdate);
     }
@@ -67,39 +69,74 @@ namespace Splitwise.Service
             return user;
         }
 
+        public User GetUserByUsername(string username)
+        {
+            var user = _userRepository.Get(u => u.Username == username);
+            return user;
+        }
+
         public bool AuthenticateUser(string username, string password)
         {
             var user = _userRepository.Get(g => g.Username == username);
             return user == null? false : SecurePasswordHasher.Verify(password, user.Password);
         }
 
-        public SaveResultModel<User> UpdateUser(User userInfoUpdate)
-        {            
-            if (string.IsNullOrEmpty(userInfoUpdate.Username))
+        public SaveResultModel<User> AddFriend(string username, string friendUsername)
+        {
+            var user = GetUserByUsername(username);
+            var result = new SaveResultModel<User> { Model = user };
+            var friend = GetUserByUsername(friendUsername);
+
+            if (user.Friends == null)
             {
-                return ReturnSimpleErrorResult("invalid username");
+                user.Friends = new List<User>();
             }
 
-            var user = _userRepository.Get(g => g.Username == userInfoUpdate.Username);
-            if (user == null)
+            if(friend == null)
             {
-                return ReturnSimpleErrorResult("user does not exist");
+                result.ErrorMessages = new List<string> { "The person you are trying to add is not a valid user." };
+            }
+            else if (!user.Friends.Contains(friend))
+            {
+                user.Friends.Add(friend);
+                this._userRepository.Update(user);
+                _unitOfWork.Commit();
+                result.Success = true;
+            }
+            else
+            {
+                result.ErrorMessages = new List<string> { "The person you are trying to add is already your friend." };
             }
 
-            user.Currency = userInfoUpdate.Currency;
-            user.Email = string.IsNullOrEmpty(userInfoUpdate.Email)? user.Email : userInfoUpdate.Email;
-            user.PhoneNumber = string.IsNullOrEmpty(userInfoUpdate.PhoneNumber) ? user.Email : userInfoUpdate.PhoneNumber;
-            user.Password = string.IsNullOrEmpty(userInfoUpdate.Password) ? user.Password : SecurePasswordHasher.Hash(userInfoUpdate.Password);
-            _unitOfWork.Commit();
-
-            return new SaveResultModel<User> { Success = true, Model = user };
+            return result;
         }
 
-        private SaveResultModel<User> ReturnSimpleErrorResult(string message)
+        public SaveResultModel<User> RemoveFriend(string username, string friendUsername)
         {
-            var result = new SaveResultModel<User> { ErrorMessages = new List<string>() };
-            result.Success = false;
-            result.ErrorMessages.Add(message);
+            var user = GetUserByUsername(username);
+            var result = new SaveResultModel<User> { Model = user };
+            var friend = GetUserByUsername(friendUsername);
+
+            if (user.Friends != null)
+            {
+                if (friend == null)
+                {
+                    result.ErrorMessages = new List<string> { "The person you are trying to remove is not a valid user." };
+                }
+                else if (user.Friends.Contains(friend))
+                {
+                    user.Friends.Remove(friend);
+                    this._userRepository.Update(user);
+                    _unitOfWork.Commit();
+
+                    result.Success = true;
+                }
+                else
+                {
+                    result.ErrorMessages = new List<string> { "The person you are trying to remove is not your friend." };
+                }
+            }
+
             return result;
         }
     }

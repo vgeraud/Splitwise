@@ -9,6 +9,7 @@ namespace Splitwise.Models
         public string Name { get; set; }
         public GroupCategory Category { get; set; }
         public IEnumerable<User> Users { get; set; }
+        public List<Expense> expenses { get; set; }
         public double CurrentBalance { get; set; }
     }
 }

@@ -14,12 +14,5 @@ namespace Splitwise.Controllers
         {
             _expenseService = expenseService;
         }
-
-        // GET api/expense
-        [HttpGet]
-        public Expense Get(int id)
-        {
-            return _expenseService.GetExpense(id);
-        }     
     }
 }
