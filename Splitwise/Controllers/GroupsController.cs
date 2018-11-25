@@ -59,5 +59,33 @@ namespace Splitwise.Controllers
             _groupService.AddExpense(group, saveResult.Model);
             return Ok(saveResult.Model);
         }
+
+        [HttpPut]
+        [Route("groups/{groupId}/expenses/{expenseId}")]
+        public IHttpActionResult PutExpense(int groupId, int expenseId, Expense expense)
+        {
+            if (expense == null)
+            {
+                return BadRequest();
+            }
+
+            var group = _groupService.GetGroup(groupId);
+
+            if (group == null)
+            {
+                return NotFound();
+            }
+
+            expense.Id = expenseId;
+            var saveResult = _expenseService.UpdateExpense(expense);
+
+            if (!saveResult.Success)
+            {
+                return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+            }
+
+            _groupService.AddExpense(group, saveResult.Model);
+            return Ok(saveResult.Model);
+        }
     }
 }

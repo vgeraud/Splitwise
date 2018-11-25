@@ -10,6 +10,7 @@ namespace Splitwise.Service
     public interface IExpenseService
     {
         SaveResultModel<Expense> CreateExpense(Expense expense);
+        SaveResultModel<Expense> UpdateExpense(Expense expense);
     }
 
     public class ExpenseService : IExpenseService
@@ -63,5 +64,48 @@ namespace Splitwise.Service
             };
         }
 
+        public SaveResultModel<Expense> UpdateExpense(Expense model)
+        {
+            if (!_expenseValidator.Validate(model, out var errorMessages))
+            {
+                return new SaveResultModel<Expense>
+                {
+                    Success = false,
+                    Model = model,
+                    ErrorMessages = errorMessages
+                };
+            }
+
+            var expense = _expenseRepository.GetById(model.Id);
+
+            if(expense == null)
+            {
+                return new SaveResultModel<Expense>
+                {
+                    Model = null,
+                    Success = false,
+                    ErrorMessages = new List<string> { "Expense does not exist." }
+                };
+            }
+
+            expense.Description = model.Description;
+            expense.Type = model.Type;
+            expense.Currency = model.Currency;
+            expense.Date = model.Date;
+            expense.IsTaxIncluded = model.IsTaxIncluded;
+            expense.CurrentAmount = model.CurrentAmount;
+            expense.InitialAmount = model.InitialAmount;
+            expense.Payer = model.Payer;
+
+            _expenseRepository.Update(expense);
+            _unitOfWork.Commit();
+
+            return new SaveResultModel<Expense>
+            {
+                Model = expense,
+                Success = true,
+                ErrorMessages = errorMessages
+            };
+        }
     }
 }

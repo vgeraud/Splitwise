@@ -11,6 +11,7 @@ namespace Splitwise.Service
     {
         SaveResultModel<Group> CreateGroup(Group model);
         void AddExpense(Group group, Expense expense);
+        void UpdateExpense(Group group, Expense expense);
         Group GetGroup(int id);
     }
 
@@ -69,6 +70,24 @@ namespace Splitwise.Service
         public void AddExpense(Group group, Expense expense)
         {
             group.expenses.Add(expense);
+
+            _groupRepository.Update(group);
+            _unitOfWork.Commit();
+        }
+
+        public void UpdateExpense(Group group, Expense expense)
+        {
+            int objectToChange = -1;
+            foreach (Expense exps in group.expenses) 
+            {
+                if(exps.Id == expense.Id)
+                {
+                    objectToChange = group.expenses.IndexOf(exps);
+                    break;
+                }
+            }
+
+            group.expenses[objectToChange] = expense;
 
             _groupRepository.Update(group);
             _unitOfWork.Commit();
