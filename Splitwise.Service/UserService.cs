@@ -166,10 +166,5 @@ namespace Splitwise.Service
 
             return result;
         }
-
-        public SaveResultModel<User> UpdateUser(User userInfoUpdate)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
