@@ -5,6 +5,7 @@ using Splitwise.Models;
 using Splitwise.Model.Validators;
 using Splitwise.Model;
 using Splitwise.Service.Helpers;
+using System;
 
 namespace Splitwise.Service
 {
@@ -15,6 +16,8 @@ namespace Splitwise.Service
         bool AuthenticateUser(string username, string password);
         SaveResultModel<User> AddFriend(string username, string friend);
         SaveResultModel<User> RemoveFriend(string username, string friend);
+
+        SaveResultModel<User> UpdateUser(User userInfoUpdate);
     }
 
     public class UserService : IUserService
