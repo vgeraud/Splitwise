@@ -211,5 +211,83 @@ namespace Splitwise.Tests.Controllers
             Assert.IsTrue(result != null);
             Assert.IsInstanceOfType(result, typeof(OkNegotiatedContentResult<Expense>));
         }
+
+        [TestMethod]
+        public void PutExpense_NullExpense_ReturnBadRequest()
+        {
+            controller = new GroupsController(null, null);
+            var result = controller.PutExpense(10, 5, null);
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(BadRequestResult));
+        }
+
+        [TestMethod]
+        public void PutExpense_IdGroupDosentExist_ReturnNotFound()
+        {
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns<Group>(null);
+            controller = new GroupsController(groupServiceMock.Object, null);
+
+            var result = controller.PutExpense(10, 5, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(NotFoundResult));
+        }
+
+        [TestMethod]
+        public void PutExpense_ErrorUpdateExpense_ReturnBadRequest()
+        {
+            var fakeSaveResult = new SaveResultModel<Expense>
+            {
+                Model = null,
+                Success = false,
+                ErrorMessages = new List<string> { "error." }
+            };
+
+            var expenseServiceMock = new Mock<IExpenseService>();
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns(new Group());
+            expenseServiceMock.Setup(m => m.UpdateExpense(It.IsAny<Expense>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object, expenseServiceMock.Object);
+
+            var result = controller.PutExpense(10, 5, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(BadRequestErrorMessageResult));
+        }
+
+        [TestMethod]
+        public void PutExpense_CorrectExpense_ReturnOk()
+        {
+            var fakeExpense = new Expense
+            {
+                Description = "tmp",
+                Type = ExpenseType.Entertainment,
+                Date = DateTime.Now,
+                Currency = Currency.CAD,
+                IsTaxIncluded = true,
+                CurrentAmount = 1,
+                InitialAmount = 1,
+                Payer = new User()
+            };
+
+            var fakeSaveResult = new SaveResultModel<Expense>
+            {
+                Model = fakeExpense,
+                Success = true
+            };
+
+            var expenseServiceMock = new Mock<IExpenseService>();
+            var groupServiceMock = new Mock<IGroupService>();
+            groupServiceMock.Setup(m => m.GetGroup(It.IsAny<int>())).Returns(new Group());
+            expenseServiceMock.Setup(m => m.UpdateExpense(It.IsAny<Expense>())).Returns(fakeSaveResult);
+            controller = new GroupsController(groupServiceMock.Object, expenseServiceMock.Object);
+
+            var result = controller.PutExpense(10, 5, new Expense());
+
+            Assert.IsTrue(result != null);
+            Assert.IsInstanceOfType(result, typeof(OkNegotiatedContentResult<Expense>));
+        }
     }
 }
