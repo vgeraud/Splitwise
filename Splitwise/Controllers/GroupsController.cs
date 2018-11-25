@@ -16,6 +16,7 @@ namespace Splitwise.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         public IHttpActionResult Post(Group groupModel)
         {
             if (groupModel == null)
@@ -33,25 +34,60 @@ namespace Splitwise.Controllers
             return BadRequest(string.Join(". ", saveResult.ErrorMessages));
         }
 
+        [HttpPut]
+        [Authorize]
+        public IHttpActionResult Put(Group groupModel)
+        {
+            if (groupModel == null)
+            {
+                return BadRequest();
+            }
+
+
+            var saveResult = _groupService.ModifyGroup(groupModel);
+
+            if (saveResult.Success)
+            {
+                return Ok(saveResult.Model);
+            }
+
+            return BadRequest(string.Join(". ", saveResult.ErrorMessages));
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public IHttpActionResult Delete(int groupId)
+        {
+            var isDeleted = _groupService.DeleteGroup(groupId) != null;
+
+            if (!isDeleted)
+            {
+                return BadRequest("Does not exist.");
+            }
+
+            return Ok();
+        }
+
         [HttpPost]
+        [Authorize]
         [Route("groups/{id}/expenses")]
         public IHttpActionResult PostExpense(int id, Expense expense)
         {
-            if(expense == null)
+            if (expense == null)
             {
                 return BadRequest();
             }
 
             var group = _groupService.GetGroup(id);
 
-            if(group == null)
+            if (group == null)
             {
                 return NotFound();
             }
 
             var saveResult = _expenseService.CreateExpense(expense);
 
-            if(!saveResult.Success)
+            if (!saveResult.Success)
             {
                 return BadRequest(string.Join(". ", saveResult.ErrorMessages));
             }

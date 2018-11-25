@@ -33,7 +33,7 @@ namespace Splitwise.IntegrationTests.Service
             }
             catch (Exception ex)
             {
-                throw;
+                throw ex;
             }
         }
     }

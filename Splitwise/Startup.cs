@@ -12,8 +12,6 @@ namespace Splitwise
 {
     public class Startup
     {
-        private IUserService _userService;
-     
         public void ConfigureAuth(IAppBuilder app)
         {
             var container = UnityConfig.Container;
