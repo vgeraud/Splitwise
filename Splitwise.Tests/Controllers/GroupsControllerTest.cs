@@ -76,7 +76,7 @@ namespace Splitwise.Tests.Controllers
 
             var groupServiceMock = new Mock<IGroupService>();
             groupServiceMock.Setup(m => m.ModifyGroup(It.IsAny<Group>())).Returns(fakeSaveResult);
-            controller = new GroupsController(groupServiceMock.Object);
+            controller = new GroupsController(groupServiceMock.Object, Mock.Of<IExpenseService>());
 
             var result = controller.Put(null);
             Assert.IsTrue(result != null);
@@ -95,7 +95,7 @@ namespace Splitwise.Tests.Controllers
 
             var groupServiceMock = new Mock<IGroupService>();
             groupServiceMock.Setup(m => m.ModifyGroup(It.IsAny<Group>())).Returns(fakeSaveResult);
-            controller = new GroupsController(groupServiceMock.Object);
+            controller = new GroupsController(groupServiceMock.Object, Mock.Of<IExpenseService>());
 
             var result = controller.Put(new Group { Name = "Group" });
 
@@ -111,7 +111,7 @@ namespace Splitwise.Tests.Controllers
             var groupServiceMock = new Mock<IGroupService>();
             groupServiceMock.Setup(m => m.DeleteGroup(It.IsAny<int>())).Returns(1);
 
-            controller = new GroupsController(groupServiceMock.Object);
+            controller = new GroupsController(groupServiceMock.Object, Mock.Of<IExpenseService>());
 
             var result = controller.Delete(groupId);
 
@@ -127,7 +127,7 @@ namespace Splitwise.Tests.Controllers
             var groupServiceMock = new Mock<IGroupService>();
             groupServiceMock.Setup(m => m.DeleteGroup(It.IsAny<int>())).Returns((int?)null);
 
-            controller = new GroupsController(groupServiceMock.Object);
+            controller = new GroupsController(groupServiceMock.Object, Mock.Of<IExpenseService>());
 
             var result = controller.Delete(groupId);
 
